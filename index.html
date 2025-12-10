@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cherry Music Video</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      /* allow scrolling on small screens so UI elements (audio controls) do not get clipped */
+      overflow: hidden;
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    html {
+      width: 100%;
+      height: 100%;
+    }
+
+    .video-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, #0a0015 0%, #1a0530 50%, #2d0a4a 100%);
+      overflow: hidden;
+    }
+
+    .stars {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        radial-gradient(2px 2px at 20% 30%, white, transparent),
+        radial-gradient(2px 2px at 60% 70%, white, transparent),
+        radial-gradient(1px 1px at 50% 50%, white, transparent),
+        radial-gradient(1px 1px at 80% 10%, white, transparent),
+        radial-gradient(2px 2px at 90% 60%, white, transparent),
+        radial-gradient(1px 1px at 33% 80%, white, transparent);
+      background-size: 200% 200%;
+      animation: twinkle 8s ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+
+    .petal {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: radial-gradient(ellipse at center, #ff69b4, #ff1493);
+      border-radius: 50% 50% 0 50%;
+      opacity: 0.7;
+      animation: fall linear infinite;
+      filter: blur(0.5px) drop-shadow(0 0 3px rgba(255, 105, 180, 0.6));
+    }
+
+    @keyframes fall {
+      0% {
+        transform: translateY(-10%) rotate(0deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.7;
+      }
+      90% {
+        opacity: 0.7;
+      }
+      100% {
+        transform: translateY(110%) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    .glow-particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: radial-gradient(circle, #ff69b4, transparent);
+      border-radius: 50%;
+      animation: float linear infinite;
+      filter: blur(1px);
+    }
+
+    @keyframes float {
+      0% {
+        transform: translate(0, 100%) scale(0);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translate(var(--drift-x), -100%) scale(1);
+        opacity: 0;
+      }
+    }
+
+    .lyric-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      text-align: center;
+      z-index: 10;
+    }
+
+    .lyric {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 48px;
+      font-weight: 300;
+      color: #ffffff;
+      text-shadow: 
+        0 0 20px rgba(255, 105, 180, 0.8),
+        0 0 40px rgba(138, 43, 226, 0.6),
+        0 0 60px rgba(255, 105, 180, 0.4);
+      opacity: 0;
+      /* allow wrapping on smaller screens so long lyrics remain readable */
+      white-space: normal;
+      max-width: 96vw;
+      margin: 0 auto;
+      letter-spacing: 1px;
+    }
+
+    .lyric.active {
+      animation: lyricFadeFloat 5s ease-out forwards;
+    }
+
+    @keyframes lyricFadeFloat {
+      0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0);
+      }
+      10% {
+        opacity: 1;
+      }
+      70% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-30px);
+      }
+      100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-60px);
+      }
+    }
+
+    .neon-pulse {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, transparent 30%, rgba(255, 105, 180, 0.1) 70%);
+      animation: pulse 4s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.3;
+      }
+      50% {
+        transform: translate(-50%, -50%) scale(1.5);
+        opacity: 0.6;
+      }
+    }
+
+    .zoom-layer {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      animation: slowZoom 149s linear forwards;
+      transform-origin: center center;
+    }
+
+    @keyframes slowZoom {
+      0% {
+        transform: scale(1);
+      }
+      100% {
+        transform: scale(1.3);
+      }
+    }
+
+    .fade-overlay {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: black;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    .fade-overlay.fade-out {
+      animation: fadeToBlack 1s ease-in forwards;
+    }
+
+    @keyframes fadeToBlack {
+      to {
+        opacity: 1;
+      }
+    }
+
+    .title-card {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      z-index: 5;
+    }
+
+    .song-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #ff69b4;
+      text-shadow: 0 0 15px rgba(255, 105, 180, 0.8);
+      margin-bottom: 8px;
+      letter-spacing: 3px;
+    }
+
+    .artist-name {
+      font-size: 16px;
+      font-weight: 300;
+      color: #ffffff;
+      text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+      letter-spacing: 2px;
+    }
+  </style>
+  <style>
+    /* Mobile friendly adjustments */
+    @media (max-width: 900px) {
+      /* allow the page to scroll on phones */
+      body { overflow: auto; }
+
+      .video-container { height: 100vh; min-height: 640px; }
+
+      /* scale down lyrical text and allow wrapping */
+      .lyric { font-size: 20px; letter-spacing: 0.5px; max-width: 86vw; }
+      .lyric.active { animation: lyricFadeFloat 4.8s ease-out forwards; }
+
+      .title-card { bottom: 84px; }
+
+      .neon-pulse { width: 220px; height: 220px; }
+
+      /* reduce glow/petal/particles for performance */
+      #petals > .petal { width: 8px; height: 8px; filter: blur(0.4px); }
+      #particles > .glow-particle { width: 3px; height: 3px; filter: blur(0.8px); }
+
+      /* make audio player fixed and reachable above safe-area */
+      .audio-wrap { position: fixed; left: 0; right: 0; bottom: calc(12px + env(safe-area-inset-bottom)); padding: 10px; display:flex; justify-content:center; z-index:9999; }
+      .audio-wrap audio{ width: min(820px, calc(100% - 32px)); height: 56px; border-radius: 12px; background: rgba(0,0,0,0.45); }
+
+      /* reduce heavy zoom animation footprint */
+      .zoom-layer { animation: none; }
+    }
+
+    @media (max-width: 420px) {
+      .video-container { min-height: 560px; }
+      .lyric { font-size: 18px; }
+      .title-card { bottom: 92px; }
+      .audio-wrap audio{ height: 56px; }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <main class="video-container">
+   <div class="zoom-layer">
+    <div class="stars"></div>
+    <div id="petals"></div>
+    <div id="particles"></div>
+    <div class="neon-pulse"></div>
+   </div>
+   <div class="lyric-container" id="lyricContainer"></div>
+   <div class="title-card">
+    <div class="song-title" id="songTitle">
+     Cherry
+    </div>
+    <div class="artist-name" id="artistName">
+     Music Video
+    </div>
+   </div>
+  <!-- audio player (place the file Cherry.m4a in the same folder) -->
+  <div class="audio-wrap" style="position:absolute; bottom:12px; left:50%; transform:translateX(-50%); z-index:20; width: min(680px,92%);">
+    <audio id="audioPlayer" controls preload="metadata" style="width: 100%; background: rgba(0,0,0,0.5); border-radius:12px; padding:8px;">
+      <source src="public/Cherry.mp3" type="audio/mp4">
+      Sorry — your browser does not support the <code>audio</code> element. You can still download the song <a href="Cherry.m4a">here</a>.
+    </audio>
+  </div>
+   <div class="fade-overlay" id="fadeOverlay"></div>
+  </main>
+  <script>  
+    const defaultConfig = {
+      song_title: "Cherry",
+      artist_name: "Music Video",
+      primary_color: "#ff69b4",
+      secondary_color: "#8a2be2",
+      background_color: "#0a0015",
+      text_color: "#ffffff",
+      accent_color: "#ff1493",
+      font_family: "Helvetica Neue",
+      font_size: 16
+    };
+
+    const lyrics = [
+      { time: 0.1, text: "That you're so pretty" },
+      { time: 6, text: "Ohh ohh ohhh ohhh" },
+      { time: 13, text: "My love so truly" },
+      { time: 17, text: "Deep for you" },
+      { time: 29, text: "Oh cherry why don't you try to love me too?" },
+      { time: 41, text: "I'm waiting for you" },
+      { time: 49, text: "I miss the way your heartbeat felt with mine" },
+      { time: 63, text: "I'd fight the world if it meant rewinding time" },
+      { time: 75, text: "If coming back to you is all I have to do," },
+      { time: 131, text: "Oh Cherry, I wish you felt this longing too" },
+      { time: 142, text: "'Cause all I want is to go back to you" }
+    ];
+
+    let startTime = null;
+    let activeLyrics = [];
+    // audio element for the song (if provided)
+    const audioEl = document.getElementById('audioPlayer');
+
+    function createPetals() {
+      const petalsContainer = document.getElementById('petals');
+      // fewer particles on narrow screens for performance
+      const isNarrow = typeof window !== 'undefined' && window.innerWidth && window.innerWidth < 600;
+      const count = isNarrow ? 12 : 30;
+      for (let i = 0; i < count; i++) {
+        const petal = document.createElement('div');
+        petal.className = 'petal';
+        petal.style.left = Math.random() * 100 + '%';
+        petal.style.animationDuration = (8 + Math.random() * 6) + 's';
+        petal.style.animationDelay = Math.random() * 8 + 's';
+        petalsContainer.appendChild(petal);
+      }
+    }
+
+    function createParticles() {
+      const particlesContainer = document.getElementById('particles');
+      // fewer particles on mobile devices for battery/perf
+      const isNarrow = typeof window !== 'undefined' && window.innerWidth && window.innerWidth < 600;
+      const count = isNarrow ? 18 : 50;
+      for (let i = 0; i < count; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'glow-particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.bottom = '0%';
+        particle.style.setProperty('--drift-x', (Math.random() - 0.5) * 100 + 'px');
+        particle.style.animationDuration = (6 + Math.random() * 4) + 's';
+        particle.style.animationDelay = Math.random() * 6 + 's';
+        particlesContainer.appendChild(particle);
+      }
+    }
+
+    function showLyric(text) {
+      const container = document.getElementById('lyricContainer');
+      const lyricDiv = document.createElement('div');
+      lyricDiv.className = 'lyric active';
+      lyricDiv.textContent = text;
+      container.appendChild(lyricDiv);
+      activeLyrics.push(lyricDiv);
+
+      setTimeout(() => {
+        lyricDiv.remove();
+        activeLyrics = activeLyrics.filter(l => l !== lyricDiv);
+      }, 5000);
+    }
+
+    // initialize played flags for each lyric
+    lyrics.forEach(l => l.played = false);
+
+    function updateVideo() {
+      // compute elapsed in seconds — prefer audio currentTime when available
+      let elapsed;
+      if (audioEl && !isNaN(audioEl.currentTime)) {
+        elapsed = audioEl.currentTime;
+      } else {
+        if (!startTime) startTime = Date.now();
+        elapsed = (Date.now() - startTime) / 1000;
+      }
+
+      // trigger lyrics whose time has passed and haven't been played yet
+      lyrics.forEach(lyric => {
+        if (!lyric.played && elapsed >= lyric.time) {
+          showLyric(lyric.text);
+          lyric.played = true;
+        }
+      });
+
+      if (elapsed >= 149) {
+        const fadeOverlay = document.getElementById('fadeOverlay');
+        fadeOverlay.classList.add('fade-out');
+        return;
+      }
+
+      requestAnimationFrame(updateVideo);
+    }
+
+    async function onConfigChange(config) {
+      const songTitle = document.getElementById('songTitle');
+      const artistName = document.getElementById('artistName');
+
+      songTitle.textContent = config.song_title || defaultConfig.song_title;
+      artistName.textContent = config.artist_name || defaultConfig.artist_name;
+
+      const customFont = config.font_family || defaultConfig.font_family;
+      const baseFontStack = 'Arial, sans-serif';
+      const baseSize = config.font_size || defaultConfig.font_size;
+
+      songTitle.style.fontFamily = `${customFont}, ${baseFontStack}`;
+      artistName.style.fontFamily = `${customFont}, ${baseFontStack}`;
+      songTitle.style.fontSize = `${baseSize * 1.5}px`;
+      artistName.style.fontSize = `${baseSize}px`;
+
+      document.querySelectorAll('.lyric').forEach(lyric => {
+        lyric.style.fontFamily = `${customFont}, ${baseFontStack}`;
+        lyric.style.fontSize = `${baseSize * 3}px`;
+      });
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.primary_color || defaultConfig.primary_color,
+              set: (value) => {
+                config.primary_color = value;
+                window.elementSdk.setConfig({ primary_color: value });
+              }
+            },
+            {
+              get: () => config.secondary_color || defaultConfig.secondary_color,
+              set: (value) => {
+                config.secondary_color = value;
+                window.elementSdk.setConfig({ secondary_color: value });
+              }
+            },
+            {
+              get: () => config.background_color || defaultConfig.background_color,
+              set: (value) => {
+                config.background_color = value;
+                window.elementSdk.setConfig({ background_color: value });
+              }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => {
+                config.text_color = value;
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            },
+            {
+              get: () => config.accent_color || defaultConfig.accent_color,
+              set: (value) => {
+                config.accent_color = value;
+                window.elementSdk.setConfig({ accent_color: value });
+              }
+            }
+          ],
+          borderables: [],
+          fontEditable: {
+            get: () => config.font_family || defaultConfig.font_family,
+            set: (value) => {
+              config.font_family = value;
+              window.elementSdk.setConfig({ font_family: value });
+            }
+          },
+          fontSizeable: {
+            get: () => config.font_size || defaultConfig.font_size,
+            set: (value) => {
+              config.font_size = value;
+              window.elementSdk.setConfig({ font_size: value });
+            }
+          }
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ["song_title", config.song_title || defaultConfig.song_title],
+          ["artist_name", config.artist_name || defaultConfig.artist_name]
+        ])
+      });
+
+      onConfigChange(window.elementSdk.config);
+    }
+
+    // keep petals/particles
+    createPetals();
+    createParticles();
+
+    // Sync lyric playing with audio: reset lyric flags on seek
+    if (audioEl) {
+      audioEl.addEventListener('seeked', () => {
+        // mark previous lyrics as played so they don't repeat
+        lyrics.forEach(l => l.played = l.time < audioEl.currentTime);
+      });
+
+      // allow restarting the visual when audio starts from the beginning
+      audioEl.addEventListener('play', () => {
+        // if audio starts near 0, reset flags so lyrics display in order
+        if (audioEl.currentTime < 0.5) lyrics.forEach(l => l.played = false);
+      });
+
+      // use RAF loop tied to audio playhead
+      (function rafLoop(){
+        updateVideo();
+        requestAnimationFrame(rafLoop);
+      })();
+    } else {
+      // fallback to the previous time-driven behavior
+      requestAnimationFrame(updateVideo);
+    }
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a6baaf56084e2e0',t:'MTc2NDUxOTU4MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
